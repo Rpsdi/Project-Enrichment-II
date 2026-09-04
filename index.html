@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dc Mon Web</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-gray">
+
+    <header class="navbar">
+        <div class="logo">Dc Mon Web</div>
+        <div style="display: flex; gap: 15px; align-items: center;">
+            <span style="font-weight: 600;">Halo, <span id="namaOperator"></span></span>
+            <button id="btnBukaModal" class="btn-success">+ Laporan Baru</button>
+            <button id="btnLogout" class="btn-danger" style="padding: 6px 12px; font-size: 0.85rem;">Logout</button>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <div class="dashboard-header">
+            <h2>DAFTAR PROBLEM AKTIF (<span id="totalProblem">0</span>)</h2>
+        </div>
+        <div id="problemList" class="problem-list"></div>
+    </div>
+
+    <!-- Modal Form Tambah Problem -->
+    <div id="modalTambah" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Buat Laporan Baru</h3>
+                <span id="btnTutupModal" class="close-btn">&times;</span>
+            </div>
+            <div class="form-group">
+                <label>Judul Peringatan</label>
+                <input type="text" id="inputJudul" placeholder="Contoh: cpu pada tim database mencapai 90%">
+            </div>
+            <div class="form-group">
+                <label>Kronologi Kejadian</label>
+                <textarea id="inputKronologi" rows="3"></textarea>
+            </div>
+            <div class="row-dropdown">
+                <div class="form-group flex-1">
+                    <label>Kategori Tim</label>
+                    <select id="inputKategori">
+                        <option value="Database">Database</option>
+                        <option value="Network">Network</option>
+                        <option value="Server">Server</option>
+                    </select>
+                </div>
+                <div class="form-group flex-1">
+                    <label>Tipe Kendala</label>
+                    <select id="inputTipe">
+                        <option value="CPU Usage">CPU Usage</option>
+                        <option value="Memory Leak">Memory Leak</option>
+                        <option value="Link Down">Link Down</option>
+                    </select>
+                </div>
+            </div>
+            <button id="btnSimpanBaru" class="btn-primary" style="width: 100%;">Terbitkan Laporan</button>
+        </div>
+    </div>
+
+    <script type="module">
+        // CEK LOGIN
+        const sesi = sessionStorage.getItem('operatorAktif');
+        if (!sesi) window.location.href = 'login.html';
+        const operator = JSON.parse(sesi);
+        
+        document.getElementById('namaOperator').innerText = operator.name;
+        document.getElementById('btnLogout').onclick = () => {
+            sessionStorage.removeItem('operatorAktif');
+            window.location.href = 'login.html';
+        };
+
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+
+        // TODO: GANTI DENGAN CONFIG FIREBASE ANDA
+        const firebaseConfig = {
+            apiKey: "AIzaSyAvEdgLXC_l6pxCDsSTLPwEtzeIYv0UJS4",
+            authDomain: "dummy-dashboard-qc.firebaseapp.com",
+            projectId: "dummy-dashboard-qc",
+            storageBucket: "dummy-dashboard-qc.firebasestorage.app",
+            messagingSenderId: "354987731717",
+            appId: "1:354987731717:web:3c894a4f7ab4449906656c"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const problemList = document.getElementById("problemList");
+        const totalProblem = document.getElementById("totalProblem");
+
+        onSnapshot(collection(db, "noc_laporan"), (snapshot) => {
+            problemList.innerHTML = "";
+            let count = 0;
+
+            snapshot.forEach((docSnap) => {
+                const data = docSnap.data();
+                count++;
+
+                const card = document.createElement("div");
+                card.className = `problem-card ${data.status === 'Resolved' ? 'resolved' : ''}`;
+                card.onclick = () => { window.location.href = `detail.html?id=${docSnap.id}`; };
+                
+                let statusLabel = data.status === 'Resolved' ? '<span class="badge-success">Problem Solved</span>' : '<span class="badge-warning">Open (Belum Selesai)</span>';
+
+                card.innerHTML = `
+                    <div class="card-left">
+                        <div class="card-title">${data.judul}</div>
+                        <div class="card-subtitle">${data.kategori} - ${data.tipe} | Dibuat oleh: <strong>${data.operator}</strong></div>
+                    </div>
+                    <div class="card-right">
+                        <div class="card-id">${data.problem_id}</div>
+                        ${statusLabel}
+                    </div>
+                `;
+                problemList.appendChild(card);
+            });
+            totalProblem.innerText = count;
+        });
+
+        // Modal Logic
+        const modalTambah = document.getElementById("modalTambah");
+        document.getElementById("btnBukaModal").onclick = () => modalTambah.classList.remove("hidden");
+        document.getElementById("btnTutupModal").onclick = () => modalTambah.classList.add("hidden");
+
+        document.getElementById("btnSimpanBaru").addEventListener("click", async () => {
+            const judul = document.getElementById("inputJudul").value;
+            if (!judul) return alert("Judul wajib diisi!");
+
+            await addDoc(collection(db, "noc_laporan"), {
+                problem_id: "PRB-" + Math.floor(1000 + Math.random() * 9000),
+                judul: judul,
+                kronologi: document.getElementById("inputKronologi").value,
+                kategori: document.getElementById("inputKategori").value,
+                tipe: document.getElementById("inputTipe").value,
+                status: "Open",
+                operator: operator.name, // Otomatis dari user yang login
+                operator_id: operator.id, // Otomatis dari user yang login
+                metode: ""
+            });
+
+            modalTambah.classList.add("hidden");
+            document.getElementById("inputJudul").value = "";
+            document.getElementById("inputKronologi").value = "";
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Penanganan Laporan</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-gray">
+
+    <div class="detail-container">
+        <a href="index.html" class="back-link">&larr; Kembali ke Dashboard</a>
+        
+        <div class="detail-header">
+            <h2>Penanganan Laporan <span id="viewId" class="badge">Memuat...</span></h2>
+            <p style="margin-top: 10px; color: #64748b; font-size: 0.9rem;">
+                Sedang ditangani oleh: <strong id="operatorPenangan"></strong>
+            </p>
+        </div>
+
+        <div class="form-group">
+            <label>Judul Peringatan</label>
+            <input type="text" id="editJudul">
+        </div>
+
+        <div class="form-group">
+            <label>Kronologi Penanganan</label>
+            <textarea id="editKronologi" rows="4"></textarea>
+        </div>
+
+        <div class="row-dropdown">
+            <div class="form-group flex-1">
+                <label>Kategori Tim</label>
+                <select id="editKategori">
+                    <option value="Database">Database</option>
+                    <option value="Network">Network</option>
+                    <option value="Server">Server</option>
+                </select>
+            </div>
+            <div class="form-group flex-1">
+                <label>Tipe Kendala</label>
+                <select id="editTipe">
+                    <option value="CPU Usage">CPU Usage</option>
+                    <option value="Memory Leak">Memory Leak</option>
+                    <option value="Link Down">Link Down</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Problem Solving Method</label>
+            <textarea id="editMetode" rows="4"></textarea>
+        </div>
+
+        <div style="display: flex; gap: 15px; margin-top: 30px;">
+            <button id="btnSimpan" class="btn-primary flex-1">Simpan Progres</button>
+            <button id="btnSelesai" class="btn-success flex-1">Tandai Problem Solved</button>
+        </div>
+    </div>
+
+    <script type="module">
+        // CEK LOGIN
+        const sesi = sessionStorage.getItem('operatorAktif');
+        if (!sesi) window.location.href = 'login.html';
+        const operator = JSON.parse(sesi);
+        document.getElementById('operatorPenangan').innerText = operator.name;
+
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+        import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+
+        // TODO: GANTI DENGAN CONFIG FIREBASE ANDA
+        const firebaseConfig = {
+            apiKey: "AIzaSyAvEdgLXC_l6pxCDsSTLPwEtzeIYv0UJS4",
+            authDomain: "dummy-dashboard-qc.firebaseapp.com",
+            projectId: "dummy-dashboard-qc",
+            storageBucket: "dummy-dashboard-qc.firebasestorage.app",
+            messagingSenderId: "354987731717",
+            appId: "1:354987731717:web:3c894a4f7ab4449906656c"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const docId = urlParams.get('id');
+
+        if (!docId) window.location.href = "index.html";
+
+        const docRef = doc(db, "noc_laporan", docId);
+
+        getDoc(docRef).then((docSnap) => {
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                document.getElementById('viewId').innerText = data.problem_id;
+                document.getElementById('editJudul').value = data.judul || "";
+                document.getElementById('editKronologi').value = data.kronologi || "";
+                document.getElementById('editKategori').value = data.kategori || "Database";
+                document.getElementById('editTipe').value = data.tipe || "CPU Usage";
+                document.getElementById('editMetode').value = data.metode || "";
+            }
+        });
+
+        const gatherData = (statusSelesai = false) => {
+            return {
+                operator: operator.name, // Memperbarui siapa yang terakhir mengedit
+                operator_id: operator.id,
+                judul: document.getElementById('editJudul').value,
+                kronologi: document.getElementById('editKronologi').value,
+                kategori: document.getElementById('editKategori').value,
+                tipe: document.getElementById('editTipe').value,
+                metode: document.getElementById('editMetode').value,
+                ...(statusSelesai && { status: "Resolved" })
+            };
+        };
+
+        document.getElementById('btnSimpan').addEventListener('click', async () => {
+            await updateDoc(docRef, gatherData(false));
+            alert("Progres Berhasil Disimpan!");
+            window.location.href = "index.html";
+        });
+
+        document.getElementById('btnSelesai').addEventListener('click', async () => {
+            if(confirm("Tandai laporan ini sebagai Problem Solved?")) {
+                await updateDoc(docRef, gatherData(true));
+                alert("Problem berhasil diselesaikan!");
+                window.location.href = "index.html";
+            }
+        });
+    </script>
+</body>
+</html>
