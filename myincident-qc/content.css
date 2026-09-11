@@ -1,0 +1,463 @@
+/*
+ * ============================================================================
+ *  myIncident QC — Gaya elemen yang disuntikkan ke halaman myIncident
+ * ============================================================================
+ *  Seluruh selector dibatasi pada kelas berprefix `mqc-` supaya gaya extension
+ *  tidak pernah menyentuh elemen milik aplikasi myIncident. Warna dan font
+ *  mengikuti tema myIncident: latar #050505, aksen #ccff00, judul Syne, isi
+ *  Plus Jakarta Sans.
+ * ============================================================================
+ */
+
+.mqc-root {
+    /* Palet dipusatkan di sini agar mudah disesuaikan. */
+    --mqc-bg: #050505;
+    --mqc-surface: #0e0e0e;
+    --mqc-border: #262626;
+    --mqc-accent: #ccff00;
+    --mqc-text: #f4f4f4;
+    /* #a9a9a9 di atas #050505 memberi kontras sekitar 8:1. */
+    --mqc-muted: #a9a9a9;
+    --mqc-danger: #ff6b6b;
+
+    position: fixed;
+    z-index: 2147483000;
+    width: 380px;
+    max-width: calc(100vw - 32px);
+    box-sizing: border-box;
+    color: var(--mqc-text);
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.mqc-root *,
+.mqc-root *::before,
+.mqc-root *::after {
+    box-sizing: border-box;
+}
+
+/* Floating QC Tools: default kiri bawah, lalu dapat digeser bebas. */
+.mqc-dock {
+    --mqc-bg: #ffffff;
+    --mqc-surface: #f7f9fc;
+    --mqc-border: #dfe5ed;
+    --mqc-accent: #2563eb;
+    --mqc-text: #172033;
+    --mqc-muted: #66758a;
+    --mqc-danger: #dc3545;
+
+    left: 20px;
+    bottom: 20px;
+}
+
+/* Keadaan ringkas: hanya bilah kepala yang tersisa. */
+.mqc-dock-collapsed {
+    width: 260px;
+}
+
+/* Panel usulan autofill lama memakai kelas ini; modifier embedded di bawah
+   memastikan panel menjadi bagian dari form dan ikut scroll bersama form. */
+.mqc-autofill {
+    left: 20px;
+    top: 20px;
+}
+
+.mqc-autofill-embedded {
+    position: relative;
+    left: auto;
+    top: auto;
+    z-index: 10;
+    width: 100%;
+    max-width: none;
+    margin: 0 0 18px;
+}
+
+.mqc-autofill-embedded .mqc-card {
+    border-color: #3b460f;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+}
+
+.mqc-autofill-embedded .mqc-body,
+.mqc-autofill-embedded .mqc-preview {
+    max-height: 34vh;
+}
+
+.mqc-dock .mqc-card {
+    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.28);
+}
+
+.mqc-drag-handle {
+    cursor: grab;
+    user-select: none;
+    touch-action: none;
+}
+
+.mqc-drag-handle.mqc-dragging {
+    cursor: grabbing;
+}
+
+.mqc-drag-handle .mqc-iconbtn {
+    cursor: pointer;
+}
+
+.mqc-grip {
+    color: var(--mqc-muted);
+    font-size: 16px;
+    line-height: 1;
+    flex: 0 0 auto;
+}
+
+.mqc-card {
+    background: var(--mqc-bg);
+    border: 1px solid var(--mqc-border);
+    border-radius: 18px;
+    box-shadow: 0 18px 45px rgba(0, 0, 0, 0.65);
+    overflow: hidden;
+}
+
+.mqc-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    background: var(--mqc-surface);
+    border-bottom: 1px solid var(--mqc-border);
+}
+
+.mqc-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: var(--mqc-accent);
+    flex: 0 0 auto;
+}
+
+/* Denyut hanya saat ada incident mandek, supaya keadaan normal tetap tenang. */
+.mqc-dot-alert {
+    background: var(--mqc-danger);
+    animation: mqc-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes mqc-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.35; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .mqc-dot-alert { animation: none; }
+}
+
+.mqc-title {
+    font-family: 'Syne', system-ui, sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    margin: 0;
+    flex: 1 1 auto;
+}
+
+.mqc-count {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--mqc-bg);
+    background: var(--mqc-accent);
+    border-radius: 999px;
+    padding: 2px 8px;
+    white-space: nowrap;
+}
+
+/* Merah #ff6b6b dengan teks #050505 memberi kontras sekitar 8:1. */
+.mqc-count-alert {
+    background: var(--mqc-danger);
+    color: #050505;
+}
+
+/* Keadaan aman ditandai lembut agar tidak menarik perhatian berlebihan. */
+.mqc-count-ok {
+    background: transparent;
+    color: var(--mqc-muted);
+    border: 1px solid var(--mqc-border);
+}
+
+/* --- Bilah penyaring ------------------------------------------------------- */
+
+.mqc-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--mqc-border);
+}
+
+.mqc-chip {
+    appearance: none;
+    background: transparent;
+    border: 1px solid var(--mqc-border);
+    color: var(--mqc-muted);
+    border-radius: 999px;
+    padding: 3px 10px;
+    font: inherit;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.mqc-chip:hover {
+    color: var(--mqc-text);
+    border-color: var(--mqc-accent);
+}
+
+.mqc-chip-on {
+    background: var(--mqc-accent);
+    border-color: var(--mqc-accent);
+    color: #0a0a0a;
+}
+
+.mqc-toolbar-note {
+    margin-left: auto;
+    font-size: 11px;
+    color: var(--mqc-muted);
+    white-space: nowrap;
+}
+
+.mqc-iconbtn {
+    appearance: none;
+    background: transparent;
+    border: 1px solid var(--mqc-border);
+    color: var(--mqc-muted);
+    border-radius: 8px;
+    width: 24px;
+    height: 24px;
+    font-size: 14px;
+    line-height: 1;
+    cursor: pointer;
+    flex: 0 0 auto;
+}
+
+.mqc-iconbtn:hover {
+    color: var(--mqc-text);
+    border-color: var(--mqc-accent);
+}
+
+.mqc-body {
+    max-height: 46vh;
+    overflow-y: auto;
+    padding: 8px;
+}
+
+.mqc-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.mqc-item {
+    width: 100%;
+    text-align: left;
+    appearance: none;
+    background: var(--mqc-surface);
+    border: 1px solid var(--mqc-border);
+    border-radius: 12px;
+    padding: 9px 11px;
+    color: var(--mqc-text);
+    font: inherit;
+    cursor: pointer;
+    display: block;
+}
+
+.mqc-item:hover {
+    border-color: var(--mqc-accent);
+}
+
+/* Incident mandek diberi pita merah di tepi kiri. */
+.mqc-item-alert {
+    border-left: 3px solid var(--mqc-danger);
+}
+
+.mqc-item-top {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin-bottom: 2px;
+}
+
+.mqc-pid {
+    font-family: 'Syne', system-ui, sans-serif;
+    font-weight: 700;
+    color: var(--mqc-accent);
+    font-size: 12px;
+}
+
+.mqc-min {
+    margin-left: auto;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--mqc-danger);
+    white-space: nowrap;
+}
+
+/* Masih dalam ambang: warna netral, bukan merah. */
+.mqc-min-ok {
+    color: var(--mqc-muted);
+}
+
+.mqc-min-unknown {
+    color: #ffd166;
+}
+
+.mqc-sub {
+    display: block;
+    font-size: 12px;
+    color: var(--mqc-text);
+    overflow-wrap: anywhere;
+}
+
+.mqc-meta {
+    display: block;
+    font-size: 11px;
+    color: var(--mqc-muted);
+    margin-top: 3px;
+}
+
+.mqc-foot {
+    padding: 8px 14px 12px;
+    font-size: 11px;
+    color: var(--mqc-muted);
+    border-top: 1px solid var(--mqc-border);
+}
+
+.mqc-empty {
+    padding: 14px;
+    font-size: 12px;
+    color: var(--mqc-muted);
+}
+
+/* --- Bagian khusus panel autofill ------------------------------------------ */
+
+.mqc-preview {
+    border-top: 1px solid var(--mqc-border);
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 40vh;
+    overflow-y: auto;
+}
+
+.mqc-field {
+    background: var(--mqc-surface);
+    border: 1px solid var(--mqc-border);
+    border-radius: 12px;
+    padding: 9px 11px;
+}
+
+.mqc-field-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.mqc-field-name {
+    font-family: 'Syne', system-ui, sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--mqc-text);
+}
+
+.mqc-check {
+    accent-color: var(--mqc-accent);
+    width: 15px;
+    height: 15px;
+    cursor: pointer;
+    flex: 0 0 auto;
+}
+
+.mqc-tag {
+    margin-left: auto;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    padding: 2px 7px;
+    border-radius: 999px;
+    border: 1px solid var(--mqc-border);
+    color: var(--mqc-muted);
+    white-space: nowrap;
+}
+
+.mqc-tag-warn {
+    color: #ffd166;
+    border-color: #6b5a1f;
+}
+
+.mqc-tag-skip {
+    color: var(--mqc-muted);
+}
+
+.mqc-value {
+    margin: 6px 0 0;
+    font-size: 12px;
+    color: var(--mqc-muted);
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    max-height: 84px;
+    overflow: hidden;
+}
+
+.mqc-actions {
+    display: flex;
+    gap: 8px;
+    padding: 10px;
+    border-top: 1px solid var(--mqc-border);
+}
+
+.mqc-btn {
+    appearance: none;
+    flex: 1 1 auto;
+    border-radius: 10px;
+    padding: 8px 12px;
+    font: inherit;
+    font-weight: 700;
+    font-size: 12px;
+    cursor: pointer;
+    border: 1px solid var(--mqc-border);
+    background: transparent;
+    color: var(--mqc-text);
+}
+
+.mqc-btn-primary {
+    background: var(--mqc-accent);
+    border-color: var(--mqc-accent);
+    color: #0a0a0a;
+}
+
+.mqc-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.mqc-root :focus-visible {
+    outline: 2px solid var(--mqc-accent);
+    outline-offset: 2px;
+}
+
+.mqc-note {
+    padding: 0 10px 10px;
+    font-size: 11px;
+    color: var(--mqc-muted);
+}
+
+/* Sorotan kartu incident. Hanya menambah kelas baru, tidak mengubah kelas
+   milik aplikasi myIncident. */
+.mqc-highlight {
+    outline: 2px solid #ccff00 !important;
+    outline-offset: 3px;
+    transition: outline-color 200ms ease;
+}

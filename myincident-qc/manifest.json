@@ -1,0 +1,52 @@
+{
+  "manifest_version": 3,
+  "name": "myIncident QC",
+  "version": "1.2.2",
+  "description": "Pemantau incident mandek dan pembantu autofill untuk myIncident.",
+  "permissions": ["storage", "unlimitedStorage", "notifications"],
+  "host_permissions": [
+    "http://localhost:8000/*",
+    "http://127.0.0.1:8000/*",
+    "https://projectmagang.my.id/*",
+    "https://www.projectmagang.my.id/*",
+    "https://firestore.googleapis.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "myIncident QC",
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "http://localhost:8000/*",
+        "http://127.0.0.1:8000/*",
+        "https://projectmagang.my.id/*",
+        "https://www.projectmagang.my.id/*"
+      ],
+      "js": [
+        "config.js",
+        "lib/kronologi.js",
+        "lib/stall.js",
+        "lib/autofill.js",
+        "content.js"
+      ],
+      "css": ["content.css"],
+      "run_at": "document_idle"
+    }
+  ]
+}

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>myIncident QC</title>
+
+    <!-- Font mengikuti aplikasi myIncident. Bila permintaan gagal, tumpukan
+         font sistem pada popup.css yang dipakai. -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+    <header class="head">
+        <span class="dot" aria-hidden="true"></span>
+        <div class="head-text">
+            <h1>myIncident QC</h1>
+            <p id="headSub">Memuat status...</p>
+        </div>
+    </header>
+
+    <!-- Pengaturan ambang batas -->
+    <section class="block" aria-labelledby="lblThreshold">
+        <h2 id="lblThreshold" class="block-title">Ambang batas mandek</h2>
+
+        <div class="row">
+            <label class="sr-only" for="inpThreshold">Ambang batas dalam menit</label>
+            <input id="inpThreshold" type="number" min="1" max="1440" step="1" inputmode="numeric">
+            <span class="unit">menit</span>
+            <button id="btnSaveThreshold" type="button" class="btn btn-primary">Simpan</button>
+        </div>
+
+        <p id="thresholdMsg" class="msg" role="status"></p>
+    </section>
+
+    <!-- Status data & aksi -->
+    <section class="block" aria-labelledby="lblData">
+        <h2 id="lblData" class="block-title">Data incident</h2>
+
+        <dl class="facts">
+            <dt>Pengambilan terakhir</dt>
+            <dd id="factFetched">-</dd>
+            <dt>Incident tersimpan</dt>
+            <dd id="factCount">-</dd>
+            <dt>Jaringan</dt>
+            <dd id="factNetwork">-</dd>
+        </dl>
+
+        <button id="btnRefresh" type="button" class="btn btn-block">Ambil ulang dari Firestore</button>
+        <p id="refreshMsg" class="msg" role="status"></p>
+    </section>
+
+    <!-- Daftar incident mandek -->
+    <section class="block" aria-labelledby="lblStalled">
+        <h2 id="lblStalled" class="block-title">
+            Incident mandek
+            <span id="stalledCount" class="pill">0</span>
+        </h2>
+
+        <p id="stalledMsg" class="msg"></p>
+        <ul id="stalledList" class="list"></ul>
+    </section>
+
+    <script src="config.js"></script>
+    <script src="lib/kronologi.js"></script>
+    <script src="lib/stall.js"></script>
+    <script src="lib/store.js"></script>
+    <script src="popup.js"></script>
+</body>
+</html>
